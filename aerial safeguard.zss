@@ -1,0 +1,81 @@
+[Function GetPixelValue(a) e]
+
+if $a >= 0
+{
+	let e = Floor($a);
+}
+else
+{
+	let e = Ceil($a);
+}
+
+[Function Gravity(Type)]
+
+let FixedVelocity = Call GetPixelValue(Vel Y);
+#Common Soldier Gravity
+if $Type = 0
+{
+	
+}
+let CurrentVelocity = Call GetPixelValue(Vel Y);
+if Time % 8 = 0 && $CurrentVelocity != $FixedVelocity
+{
+	VelAdd{Y: -1}
+}
+
+#map values to determine default behavior when on the air without StateType being A and L
+#map(NONAME01150_Platform_AutoFall)
+#0 - Deactivated
+#1 - Gets affected by your yaccel, goes to specified Fall State if Vel Y != 0 (Velocity is truncated to only the numbers before the decimal point)
+#2 - Gets affected by your yaccel, without going to Fall State itself
+#3 - Same as 1 but you need to specify how much downward velocity is used (It's still added to your Y velocity)
+#4 - Same as 2 but you need to specify how much downward velocity is used (It's still added to your Y velocity)
+#map(NONAME01150_Platform_Yaccel)
+#Specify the amount to add to the Y Velocity while in autofall 3 or 4
+#map(NONAME01150_Platform_FallState)
+#The State to go once Y velocity is no longer 0. If you don't know (or want) a specific state for the char to go then use state 50
+#map(NONAME01150_Platform_FallStateCtrl)
+#Wheter or not the char will have control during the jump. Recommended 1 if it's not a conventional character eg: Hi-Do from Metal Slug
+
+#Default setting to copy to the [Map] section of the char .def file
+#NONAME01150_Platform_AutoFall = 1
+#NONAME01150_Platform_Yaccel = 0.2
+#NONAME01150_Platform_FallState = 50
+#NONAME01150_Platform_FallStateCtrl = 1
+
+[StateDef -4]
+
+let PixelPosY = Call GetPixelValue(Pos Y);
+
+ignorehitpause if map(NONAME01150_Platform_AutoFall) = [1,4] && $PixelPosY != 0 && StateType != A && StateType != L && TeamSide != 0
+{
+	if map(NONAME01150_Platform_AutoFall) = [3,4] && map(NONAME01150_Platform_Yaccel)
+	{
+		VelAdd{Y: map(NONAME01150_Platform_Yaccel)}
+	}
+	else
+	{
+		VelAdd{Y: const(movement.yaccel)}
+	}
+	let PixelVelY = Call GetPixelValue(Vel Y); #Get Y Velocity without the decimal point
+
+	if ($PixelVelY != 0) && StateNo != floor(map(NONAME01150_Platform_FallState)) && map(NONAME01150_Platform_FallState) > -1 #if Y Velocity is not 0 and you're not in fall state and fall state is bigger than -1 (set to -1 for no fallstate)
+	{
+		if map(NONAME01150_Platform_AutoFall) = 1 || map(NONAME01150_Platform_AutoFall) = 3
+		{
+			ChangeState{Value: floor(map(NONAME01150_Platform_FallState)); Ctrl: map(NONAME01150_Platform_FallStateCtrl)} #change to specified fall state with specified ctrl
+		}
+	}
+
+	if Ceil(Pos Y) >= Min(-1, map(NONAME01150_PLATFORM_HEIGHT)) # if Pos Y is inside or close to the ground (the platform can have an extension of it). works to make the char stay on the moving platform
+	{
+		PosSet{Y: 0}
+		VelSet{Y: 0}
+		if map(NONAME01150_PLATFORM_ID) != 0 #if platform id was given
+		{
+			PosAdd{X: PlayerID(map(NONAME01150_PLATFORM_ID)),Vel X * facing} #move char depending on the platform's X Vel multiplied by the char's facing
+		}
+	}
+	map(NONAME01150_PLATFORM_HEIGHT) := 0;
+	map(NONAME01150_PLATFORM_ID) := 0;
+}

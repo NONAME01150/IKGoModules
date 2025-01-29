@@ -1,3 +1,4 @@
+#Module to make chars go to their fall state (State 50 assumed) when in the air
 [Function GetPixelValue(a) e]
 
 if $a >= 0

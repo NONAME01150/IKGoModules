@@ -1,4 +1,6 @@
 Modules to be used as a common state.
+To learn how to load these refer to this link:
+https://github.com/ikemen-engine/Ikemen-GO/wiki/Miscellaneous-Info/#CommonStates
 
 Aerial Safeguard - Go to a fall state if on the air and statetype returns S or C. Requires minimal editing on chars.
 

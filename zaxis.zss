@@ -1,0 +1,61 @@
+#[StateDef const(StateWalkZ); type: S; physics: S; sprpriority: 0;]
+
+#assertSpecial{flag: NoCrouch; flag2: NoJump; flag3: nowalk}
+
+#velset{x: cond(inputTime(B) > 0, const(velocity.walk.back.x), const(velocity.walk.fwd.x) * (inputTime(F) > 0));
+#		z: -const(velocity.walk.fwd.x) * (inputTime(U) > 0) + const(velocity.walk.fwd.x) * (inputTime(D) > 0)}
+
+#if p2Dist x < 0 && anim != const(AnimStandTurning)
+#{
+#	changeAnim{value: const(AnimStandTurning)}
+#}
+#if anim = const(AnimStandTurning) && !animTime
+#{
+#	turn{}
+#}
+#if vel x < 0 {
+#	if cond(anim = const(AnimStandTurning), animTime = 0, anim != const(AnimWalkingBackwards)) {
+#		changeAnim{value: const(AnimWalkingBackwards)}
+#	}
+#} else if vel x > 0 || vel z != 0 && anim != const(AnimWalkingBackwards) {
+#	if cond(anim = const(AnimStandTurning), animTime = 0, anim != const(AnimWalkingForwards)) {
+#		changeAnim{value: const(AnimWalkingForwards)}
+#	}
+#}
+
+#if inputTime(F) < 0 && inputTime(B) < 0 && inputTime(D) < 0 && inputTime(U) < 0
+#{
+#	changeState{value: const(StateStand)}
+#}
+
+[StateDef -4]
+
+if TeamSide != 0 && !IsHelper && !Standby && Alive && RoundState = [2,3] && !pauseTime && !Vel Z
+{
+	if botBoundDist != 0 && StateType = S && inputTime(D) != [-12,-1]
+	{
+		assertSpecial{flag: NoCrouch}
+		#if Ctrl && StateType = S && (command = "holddown") && map(NONAME01150_AutoZaxis) = 0
+		#{
+		#	changeState{value: const(StateWalkZ)}
+		#}
+		
+		if ((Ctrl || stateNo = 100) && command = "holddown" || (aiLevelF && MoveType != H || !aiLevelF && MoveType = A) && Vel X && p2Dist Z > 0)
+		{
+			posadd{z: const(velocity.walk.fwd.x) - (0.5 * (MoveType = A))}
+		}
+	}
+	if topBoundDist != 0 && StateType = S && inputTime(U) != [-12,-1]
+	{
+		assertSpecial{flag: NoJump}
+		#if Ctrl && StateType = S && (command = "holdup") && map(NONAME01150_AutoZaxis) = 0
+		#{
+		#	changeState{value: const(StateWalkZ)}
+		#}
+		
+		if ((Ctrl || stateNo = 100) && command = "holdup" || (aiLevelF && MoveType != H || !aiLevelF && MoveType = A) && Vel X && p2Dist Z < 0)
+		{
+			posadd{z: -const(velocity.walk.fwd.x) + (0.5 * (MoveType = A))}
+		}
+	}
+}

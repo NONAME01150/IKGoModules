@@ -1,0 +1,44 @@
+#Truncates the decimal part.
+[Function Trunc(a) e]
+
+if $a >= 0
+{
+	let e = Floor($a);
+}
+else
+{
+	let e = Ceil($a);
+}
+
+#Change a char's groundlevel
+#i - playerindex id
+#x1 - left edge
+#x2 - right edge
+#y1 - vertical top edge
+#y2 - vertical bottom edge
+#h - extension of bottom edge
+#z1 - lateral top edge
+#z2 - lateral bottom edge
+#snap - set player pos Y to y2 - boolean
+[Function N115_SetPosY(i, x1, x2, y1, y2, h, z1, z2, snap)]
+
+let pId = playerindex($i),ID;
+let pPosX = playerindex($i),pos X + playerindex($i),cameraPos X;
+let pPosY = Call Trunc(playerindex($i),pos Y);
+let pPosZ = playerindex($i),pos Z;
+let pGround = Call Trunc(playerindex($i),GroundLevel);
+let pPlatPosY = $pPosY + $pGround;
+let pVelY = playerindex($i),vel Y;
+let GetHitExtraPosition = (playerindex($i),Const(movement.air.gethit.groundlevel) * 3 * (playerIndex($i),MoveType = H && (playerIndex($i),stateType = A || playerIndex($i),stateType = L)) );
+
+ignoreHitPause if $pPosX = [$x1, $x2]
+				&& $pPlatPosY = [$y1 - abs($pVelY), $y2 + Max(0, $pVelY) + $h + $GetHitExtraPosition]
+				&& $pPosZ = [$z1, $z2]
+{
+	GroundLevelOffSet{Value: $y2; redirectID: $pID}
+
+	if $snap
+	{
+		posSet{y: 0; redirectId: $pID} 
+	}
+}

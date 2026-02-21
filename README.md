@@ -5,3 +5,5 @@ https://github.com/ikemen-engine/Ikemen-GO/wiki/Miscellaneous-Info/#CommonStates
 Aerial Safeguard - Go to a fall state if on the air and statetype returns S or C. Requires minimal editing on chars.
 
 Z Axis - Move up and down if a stage's topbound or botbound parameter is not 0. If up or down is pressed after being released from 1 to 11 frames, the char will do the action it would normally do. Gets ignored if vel z isn't 0.
+
+Platform - Barebones use of GroundLevelSet to simulate a platform. Make sure to load it in the attachedchar as they don't seem capable of using commonstates. (21/02/2026)
